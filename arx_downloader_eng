@@ -6,7 +6,7 @@
 
 ## TODO ###################################################
 ##
-## * Make latest stable version check
+## * Updater not update stable version
 ## * Make external language files
 ##
 ###########################################################
@@ -103,19 +103,18 @@ function libertatisDownload () {
     getLatestLibertatisVersion
     
     ## Choosing Libertatis version dialog, downloading, unpacking and installing
-    ver=$(zenity --list --width=480 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="Please, select prefered Arx Libertatis version." --radiolist --column="" --column="Versions" TRUE "Latest Stable 1.1.2 (Recommended)" FALSE "Latest Development Snapshot ($latestVer)")
+    ver=$(zenity --list --width=480 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="Please, select prefered Arx Libertatis version." --radiolist --column="" --column="Versions" TRUE "Latest Stable $latestStableVerShort (Recommended)" FALSE "Latest Development Snapshot ($latestVerShort)")
     if [ $? -eq "0" ]
     then
-        if [ "$ver" = "Latest Stable 1.1.2 (Recommended)" ]
+        if [ "$ver" = "Latest Stable $latestStableVerShort (Recommended)" ]
         then
             cd $install_folder/arx
-            recommendedLinuxVerURL="http://arx-libertatis.org/files/arx-libertatis-1.1.2-linux.tar.xz"
-            curl -sqL $recommendedLinuxVerURL | tar xJf - | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Libertatis Downloader" --text="Downloading and unpacking Arx Libertatis" --auto-close
+            curl -sqL $latestStableLinuxVerURL | tar xJf - | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Libertatis Downloader" --text="Downloading and unpacking Arx Libertatis" --auto-close
             
             ## Move all downloaded files into arx diectory
-            cd arx-libertatis-1.1.2-linux
+            cd $latestStableVer-linux
             find . -maxdepth 1 -exec mv {} .. \;
-            rmdir ../arx-libertatis-1.1.2-linux
+            rmdir ../$latestStableVer-linux
             
             ## Send choosen version to conf file
             toConfFile "AL_VERSION=Stable"
@@ -154,12 +153,21 @@ function libertatisDownload () {
 
 function getLatestLibertatisVersion () {
 
+    ## Detecting latest stable version of Arx Libertatis from arx-libertatis.org
+    declare -g latestStableVer=$(wget -O- http://arx-libertatis.org/files/ | grep -Eo 'arx-libertatis-[[:digit:]]{1}.[[:digit:]]{1}.[[:digit:]]{1}' | sort -V | tail -1)
     ## Detecting latest dev version of Arx Libertatis from arx-libertatis.org
     declare -g latestVer=$(wget -O- http://arx-libertatis.org/files/snapshots/ | grep -Eo 'arx-libertatis-1.2-dev-[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}' | sort -V | tail -1)
     
+    ## Set file name and url for the latest stable Arx Libertatis version
+    declare -g latestStableLinuxVerFile=$latestStableVer"-linux.tar.xz"
+    declare -g latestStableLinuxVerURL="http://arx-libertatis.org/files/$latestStableVer/$latestStableLinuxVerFile"
     ## Set file name and url for the latest Arx Libertatis version
     declare -g latestLinuxVerFile=$latestVer"-linux.tar.xz"
     declare -g latestLinuxVerURL="http://arx-libertatis.org/files/snapshots/$latestVer/$latestLinuxVerFile"
+    
+    ## "short-version" variables
+    declare -g latestStableVerShort=$(echo $latestStableVer | cut -c 16-)
+    declare -g latestVerShort=$(echo $latestVer | cut -c 16-)
 }
 
 function libertatisVersionChecker () {
