@@ -4,6 +4,13 @@
 #### Author: Osguot ####
 ########################
 
+## TODO ###################################################
+##
+## * Make latest stable version check
+## * Make external language files
+##
+###########################################################
+
 VERSION="3.1"
 
 ## This file contain information about install directory and type of installation
@@ -94,7 +101,6 @@ function libertatisDownload () {
     
     ## Check latest version
     getLatestLibertatisVersion
-    ## TODO Make latest stable version check
     
     ## Choosing Libertatis version dialog, downloading, unpacking and installing
     ver=$(zenity --list --width=480 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="Please, select prefered Arx Libertatis version." --radiolist --column="" --column="Versions" TRUE "Latest Stable 1.1.2 (Recommended)" FALSE "Latest Development Snapshot ($latestVer)")
