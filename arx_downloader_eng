@@ -1,0 +1,490 @@
+#!/bin/bash
+
+########################
+#### Author: Osguot ####
+########################
+
+VERSION="3.1"
+
+## This file contain information about install directory and type of installation
+arx_downloader_conf_file="/home/$USER/.config/arx_downloader.conf"
+
+## Export conf file if exist
+if [ -f "$arx_downloader_conf_file" ]
+then
+    source $arx_downloader_conf_file
+fi
+
+## User share directory variable
+USER_SHARE=/home/$USER/.local/share
+
+function initialCheck () {
+    
+    ## Zenity check
+    if [[ $(hash zenity) -eq "1" ]]
+    then
+        echo "Zenity not found. Exit."
+        exit 1
+    fi
+    
+    ## Root check
+    if [ "$EUID" -eq 0 ]
+    then 
+        zenity --error --no-wrap --ok-label="Exit" --width=250 --title="Arx Downloader Checker - Error" --text="This script must NOT be run as root"
+        exit 1
+    fi
+    
+    ## Check for previous installation
+    if [ -f "$arx_downloader_conf_file" ]
+    then
+        ## Set main menu text based on previous installation (if exist)
+        if [ "$TYPE" = "OnlyLibertatis" ]
+        then
+            declare -g MM_text="Script version: $VERSION\n\nFounded Arx Libertatis installation!\nType: Only Arx Libertatis\nVersion: $AL_VERSION\nPath: $INSTALL_DIR"
+        elif [ "$TYPE" = "OnlyFatalis" ]
+        then
+            declare -g MM_text="Script version: $VERSION\n\nFounded Arx Fatalis installation!\nType: Only Arx Fatalis\nPath: $INSTALL_DIR"
+        elif [ "$TYPE" = "Complex" ]
+        then
+            declare -g MM_text="Script version: $VERSION\n\nFounded Arx Libertatis installation!\nType: Arx Libertatis and Arx Fatalis\nVersion: $AL_VERSION\nPath: $INSTALL_DIR"
+        fi
+    else
+        declare -g MM_text="Script version: $VERSION"
+    fi
+}
+
+function libertatisDownload () {
+    
+    ## Set Arx Libertatis install directory
+    directory=$(zenity  --list --width=400 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text "Choose directory for Arx Libertatis files.\nArx directory will be created automatically in the selected directory.\n\nDefault: $USER_SHARE" --radiolist --hide-header --column "" --column "Options" TRUE "Default" FALSE "Choose...")
+    if [ $? -eq "0" ]
+    then
+        if [ "$directory" = "Default" ]
+        then
+            declare -g install_folder="$USER_SHARE"
+            cd $install_folder
+            if [ -d "arx" ]
+            then
+                rm -r arx
+            fi
+            mkdir -p "$install_folder/arx"
+        else
+            if [ "$directory" = "Choose..." ]
+            then
+                declare -g install_folder=`zenity --file-selection --directory --title="Choose directory for Arx Libertatis files"`
+                if [ $? -eq "0" ]
+                then
+                    cd $install_folder
+                    if [ -d "arx" ]
+                    then
+                        rm -r arx
+                    fi
+                    mkdir -p "$install_folder/arx"
+                else
+                    end
+                fi
+            fi
+        fi
+    else
+        end
+    fi
+    
+    ## Save working folder for uninstaller
+    toConfFile "TYPE=OnlyLibertatis" "INSTALL_DIR=$install_folder"
+    
+    ## Check latest version
+    getLatestLibertatisVersion
+    ## TODO Make latest stable version check
+    
+    ## Choosing Libertatis version dialog, downloading, unpacking and installing
+    ver=$(zenity --list --width=480 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="Please, select prefered Arx Libertatis version." --radiolist --column="" --column="Versions" TRUE "Latest Stable 1.1.2 (Recommended)" FALSE "Latest Development Snapshot ($latestVer)")
+    if [ $? -eq "0" ]
+    then
+        if [ "$ver" = "Latest Stable 1.1.2 (Recommended)" ]
+        then
+            cd $install_folder/arx
+            recommendedLinuxVerURL="http://arx-libertatis.org/files/arx-libertatis-1.1.2-linux.tar.xz"
+            curl -sqL $recommendedLinuxVerURL | tar xJf - | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Libertatis Downloader" --text="Downloading and unpacking Arx Libertatis" --auto-close
+            
+            ## Move all downloaded files into arx diectory
+            cd arx-libertatis-1.1.2-linux
+            find . -maxdepth 1 -exec mv {} .. \;
+            rmdir ../arx-libertatis-1.1.2-linux
+            
+            ## Send choosen version to conf file
+            toConfFile "AL_VERSION=Stable"
+        else
+            ## Go to install directory and download archive into it
+            cd $install_folder/arx
+            curl -sqL $latestLinuxVerURL | tar xJf - | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Libertatis Downloader" --text="Downloading and unpacking Arx Libertatis" --auto-close
+            
+            ## Move all downloaded files into arx diectory
+            cd $latestVer-linux
+            find . -maxdepth 1 -exec mv {} .. \;
+            rmdir ../$latestVer-linux
+            
+            ## Send choosen version to conf file
+            toConfFile "AL_VERSION=$latestVer"
+        fi
+    else
+        end
+    fi
+    
+    ## Download game data if complex parameter has been set
+    if [ "$1" = "complex" ]
+    then
+        gameDownload complex
+    else
+        zenity --info --no-wrap --title="Arx Libertatis Downloader" --ok-label="Ok" --text="Arx Libertatis successfully downloaded."
+    fi
+    
+    ## Call install function
+    zenity --question --no-wrap --ok-label="Yes" --cancel-label="No" --title="Arx Libertatis Installer" --text="Do you want add shortcut to the application menu and install arx binaries?\n\nRoot privileges is required."
+    if [ $? -eq "0" ]
+    then
+        libertatisInstall
+    fi
+}
+
+function getLatestLibertatisVersion () {
+
+    ## Detecting latest dev version of Arx Libertatis from arx-libertatis.org
+    declare -g latestVer=$(wget -O- http://arx-libertatis.org/files/snapshots/ | grep -Eo 'arx-libertatis-1.2-dev-[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}' | sort -V | tail -1)
+    
+    ## Set file name and url for the latest Arx Libertatis version
+    declare -g latestLinuxVerFile=$latestVer"-linux.tar.xz"
+    declare -g latestLinuxVerURL="http://arx-libertatis.org/files/snapshots/$latestVer/$latestLinuxVerFile"
+}
+
+function libertatisVersionChecker () {
+    
+    function libertatisUpdate () {
+
+        ## Go to install directory and download archive into it
+        cd $INSTALL_DIR/arx
+        curl -sqL $latestLinuxVerURL | tar xJf - | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Libertatis Updater" --text="Downloading and unpacking Arx Libertatis" --auto-close
+        
+        cd $latestVer-linux
+        ## Remove old bin and data directories and copy new one
+        rm -rf ../{bin,data}
+        mv {bin,data} ../
+        rm -rf ../$latestVer-linux
+        
+        ## Change Arx Libertatis version in config file
+        oldVersion=$(grep "AL_VERSION=" $arx_downloader_conf_file)
+        sed -i -e "s/$oldVersion/AL_VERSION=$latestVer/g" $arx_downloader_conf_file
+        
+        zenity --info --no-wrap --title="Arx Libertatis Updater" --text="Arx Libertatis successfully updated to version $latestVer."
+    }
+    
+    ## Check conf file
+    if [ -f "$arx_downloader_conf_file" ]
+    then
+        ## Check current installed version
+        if [ -z "$AL_VERSION" ]
+        then
+            zenity --warning --no-wrap --title="Arx Libertatis Updater" --ok-label="Exit" --text="Arx Libertatis installation not found.\n\nArx Libertatis MUST be installed by this script."
+            exit 1
+        elif [ "$AL_VERSION" = "Stable" ]
+        then
+            upgr=$(zenity --question --no-wrap --title="Arx Libertatis Updater" --ok-label="Yes" --cancel-label="No" --text="Your current installed version of Arx Libertatis is Stable.\n\nDo you want to upgrade to the development version?")
+            
+            ## Exit if No
+            if [ $? -eq "1" ]
+            then
+                exit 0
+            fi
+        fi
+    else
+        zenity --warning --no-wrap --title="Arx Libertatis Updater" --ok-label="Exit" --text="Arx Libertatis installation not found.\n\nArx Libertatis MUST be installed by this script."
+        exit 1
+    fi
+    
+    ## Call getLatestLibertatisVersion function
+    getLatestLibertatisVersion
+    
+    ## arx-libertatis-1.2-dev-YYYY-MM-DD --> YYYY-MM-DD
+    latest=$(echo $latestVer | grep -Eo '[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}')
+    current=$(echo $AL_VERSION | grep -Eo '[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}')
+    
+    ## Version comparison
+    if [[ "$latest" > "$current" ]]
+    then
+        upd=$(zenity --question --no-wrap --title="Arx Libertatis Updater" --ok-label="Yes" --cancel-label="No" --text="Update available! \n\nCurrent version: $AL_VERSION\nNew version: $latestVer\n\nStart update process?")
+        if [ $? -eq "0" ]
+        then
+            libertatisUpdate
+        else
+            exit 0
+        fi
+    else
+        zenity --warning --no-wrap --title="Arx Libertatis Updater" --ok-label="Exit" --text="New versions of Arx Libertatis not found."
+        exit 0
+    fi
+}
+
+function libertatisInstall () {
+    
+    ## Install binaries
+    pkexec <<EOF
+    ln -s $install_folder/arx/arx /usr/local/bin
+    ln -s $install_folder/arx/arxunpak /usr/local/bin
+    ln -s $install_folder/arx/arxsavetool /usr/local/bin
+EOF
+    
+    ## Install icons
+    for size in 16 22 24 32
+    do
+        mkdir -p $USER_SHARE/icons/hicolor/$size\x$size/apps
+        cp $install_folder/arx/arx-libertatis_$size.png $USER_SHARE/icons/hicolor/$size\x$size/apps
+    done
+    
+    mkdir -p $USER_SHARE/icons/hicolor/128x128/apps
+    cp $install_folder/arx/arx-libertatis.png $USER_SHARE/icons/hicolor/128x128/apps
+    
+    ## Install .desktop file
+    cp $install_folder/arx/arx-libertatis.desktop $USER_SHARE/applications
+    
+    ## For uninstaller
+    toConfFile "BIN_ICO=true"
+    
+    ## Info message
+    zenity --info --no-wrap --window-icon=arx-libertatis_32.png --title="Arx Libertatis Installer" --text="Arx Libertatis successfully installed!"
+}
+
+function libertatisUninstaller () {
+
+    ## Check and export conf file
+    if [ -f "$arx_downloader_conf_file" ]
+    then
+        zenity --question --no-wrap --ok-label="Yes" --cancel-label="Cancel" --title="Arx Uninstaller - WARNING" --text="Are you sure you want to completly delete Arx Libertatis?\nThis also delete game data files.\n\nIf saves will be detected script will offer to save them."
+        if [ $? -eq "1" ]
+        then
+            exit 1
+        fi
+    else
+        zenity --error --no-wrap --title="Arx Uninstaller" --text="It looks like Arx is not installed on your system or it be installed without this script. Aborting."
+        end
+    fi
+    
+    ## Check for installed binaries and icons
+    if [ -n "$BIN_ICO" ]
+    then
+        ## Deleting binaries
+        pkexec rm /usr/local/bin/arx /usr/local/bin/arxsavetool /usr/local/bin/arxunpak
+        
+        ## Deleting icons
+        for size in 16 22 24 32
+        do
+            rm $USER_SHARE/icons/hicolor/$size\x$size/apps/arx-libertatis_$size.png
+        done
+        rm $USER_SHARE/icons/hicolor/128x128/apps/arx-libertatis.png
+        
+        ## Deleting menu entry
+        rm $USER_SHARE/applications/arx-libertatis.desktop
+    fi
+    
+    ## Check game saves and delete arx directory in user/.local/share
+    if [ -d $USER_SHARE/arx/save ]
+    then
+        if [ -z "$(ls -A $USER_SHARE/arx/save)" ]
+        then
+            rm -rf $USER_SHARE/arx
+        else
+            ## Game saves found
+            saves=$(zenity --question --no-wrap --ok-label="Backup Saves" --cancel-label="Delete Saves" --title="Arx Uninstaller" --text="Game saves has been found.\n\nWhat do you want to do?")
+            if [ $? -eq "0" ]
+            then
+                ## Backup saves
+                backup_dir=$(zenity --file-selection --directory --title="Choose folder for backup")
+                backup_name="Arx_Saves_Backup_($(date +"%d-%b-%Y")).tar.gz"
+                cd $USER_SHARE
+                tar -zcf $backup_dir/$backup_name arx/save
+            fi
+            ## Delete arx directory
+            rm -rf $USER_SHARE/arx
+        fi
+    fi
+    
+    ## Deleting working/install directory
+    if [ "$TYPE" = "OnlyFatalis" ]
+    then
+        rm -rf $INSTALL_DIR
+    else
+        rm -rf $INSTALL_DIR/arx
+    fi
+    
+    ## Deleting config directory
+    rm -rf /home/$USER/.config/arx
+    
+    ## Deleting arx_downloader.conf file
+    rm $arx_downloader_conf_file
+    
+    ## Success message
+    zenity --info --no-wrap --ok-label="Done" --title="Arx Uninstaller" --text="Arx Libertatis successfully uninstalled!"
+}
+
+function gameDownload () {
+    
+    ## Set directory for downloaded files equal AL install directory if complex install parameter has been set
+    if [ "$1" = "complex" ]
+    then
+        working_folder="$install_folder/arx/arx_downloader"
+        mkdir -p "$working_folder"
+        ## Save working folder and version for uninstaller
+        toConfFile "TYPE=Complex" "INSTALL_DIR=$install_folder"
+        toConfFile "AL_VERSION=$latestVer"
+    else
+        ## Set directory for downloaded game files
+        directory=$(zenity  --list --width=400 --cancel-label="Exit" --ok-label="Next" --title "Arx Downloader" --text "Choose directory for downloaded game files.\nDefault: /home/$USER/arx_downloader" --radiolist --hide-header --column "" --column "Options" TRUE "Default" FALSE "Choose...")
+        if [ $? -eq "0" ]
+        then
+            if [ "$directory" = "Default" ]
+            then
+                working_folder="/home/$USER/arx_downloader"
+                mkdir -p "$working_folder"
+
+            else
+                if [ "$directory" = "Choose..." ]
+                then
+                    working_folder=`zenity --file-selection --directory --title="Choose directory for downloaded game files"`/arx_downloader
+                    if [ $? -eq "0" ]
+                    then
+                        mkdir -p "$working_folder"
+                    else
+                        end
+                    fi
+                fi
+            fi
+            
+            ## Save working folder for uninstaller
+            toConfFile "TYPE=OnlyFatalis" "INSTALL_DIR=$working_folder"
+        else
+            end
+        fi
+    fi
+
+    ## Set Steam login and password
+    loginpass=$(zenity --username --password --title="Enter your Steam Username and Password")
+    if [ $? -eq "1" ]
+    then
+        end
+    fi
+    loginpass=$(echo $loginpass | tr '|' ' ')
+
+    ## Download SteamCMD
+    cd $working_folder
+    curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf - | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Downloader" --text="Downloading and unpacking SteamCMD" --auto-close
+    ./steamcmd.sh +login anonymous +quit | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Downloader" --text="Updating SteamCMD" --auto-close
+
+    ## Game language selection
+    lang=$(zenity  --list --width=400 --height=300 --cancel-label="Cancel" --ok-label="Next" --title "Arx Downloader" --text="Choose prefered game language" --radiolist --column="" --column="Language" TRUE "English" FALSE "Russian" FALSE "French" FALSE "Italian" FALSE "German" FALSE "Spanish")
+    if [ $? -eq "0" ]
+    then
+        case $lang in
+            Russian)
+                language="russian";;
+            French)
+                language="french";;
+            Italian)
+                language="italian";;
+            German)
+                language="german";;
+            Spanish)
+                language="spanish";;
+            *)
+                language="english";;
+        esac
+    else
+        zenity --question --no-wrap --title="Arx Downloader" --text="Stop the script and abort Arx downloading?"
+        if [ $? -eq "0" ]
+        then
+            end
+        fi
+    fi
+
+    ## Download Arx Fatalis
+    mkdir arx
+    xterm -bg black -fg white -e ./steamcmd.sh +@sSteamCmdForcePlatformType windows +login $loginpass +force_install_dir ./arx +app_update 1700 validate -language $language +quit
+
+    ## Check and Clean up
+    if [ -e ./arx/arx.exe ]
+    then
+        #echo "Success"
+        cd ./arx
+        mv *.pak Graph misc ../
+        cd ..
+        rm -r arx linux64 linux32 package public steamcmd.sh
+        for i in *; do mv $i `echo $i | tr [:upper:] [:lower:]`; done
+        if [ $? -eq "0" ]
+        then
+            zenity --info --no-wrap --title="Arx Downloader" --ok-label="Ok" --text="Arx Fatalis successfully downloaded."
+        fi
+    else
+        #echo "Fail"
+        zenity --error --no-wrap --title="Arx Downloader - Ooops" --text="Arx Downloader\n\nAn error occurred. Please try again."
+        rm -r arx linux64 linux32 package public steamcmd.sh
+    fi
+    
+    ## Copy game files into Arx Libertatis directory and remove temporary directory (only complex installation)
+    if [ "$1" = "complex" ]
+    then
+        cd $working_folder
+        cp -r * .. | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Downloader" --text="Copying files..." --auto-close
+        rm -rf ../arx_downloader
+    fi
+}
+
+function toConfFile () {
+    
+    ## If function gets 2 parameters - replace existing file with new one
+    if [[ -n "$1" && -n "$2" ]]
+    then
+        echo "$1" > $arx_downloader_conf_file
+        echo "$2" >> $arx_downloader_conf_file
+    ## Else - add line to existing file
+    else
+        echo "$1" >> $arx_downloader_conf_file
+    fi
+}
+
+function end () {
+    
+    ## Delete arx_downloader.conf file when canceled
+    rm $arx_downloader_conf_file
+    exit 1
+}
+
+initialCheck
+
+## Main menu constructor
+if [ -f "$arx_downloader_conf_file" ]
+then
+    if [ "$TYPE" = "Complex" ] || [ "$TYPE" = "OnlyLibertatis" ]
+    then
+        menu=$(zenity --list --width=310 --height=250 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="$MM_text" --radiolist --column="" --column="" TRUE "Check for updates" FALSE "Uninstall Arx Libertatis completely")
+    elif [ "$TYPE" = "OnlyFatalis" ]
+    then
+        menu=$(zenity --list --width=310 --height=250 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="$MM_text" --radiolist --column="" --column="" TRUE "Uninstall Arx Libertatis completely")
+    fi
+else
+    menu=$(zenity --list --width=310 --height=250 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="$MM_text" --radiolist --column="" --column="" TRUE "Download Arx Libertatis and Arx Fatalis" FALSE "Download Arx Libertatis only" FALSE "Download Arx Fatalis only" FALSE "Check for updates" FALSE "Uninstall Arx Libertatis completely")
+fi
+
+if [ $? -eq "0" ]
+then
+    case $menu in
+        "Download Arx Libertatis and Arx Fatalis")
+            libertatisDownload complex;;
+        "Download Arx Libertatis only")
+            libertatisDownload;;
+        "Download Arx Fatalis only")
+            gameDownload;;
+        "Check for updates")
+            libertatisVersionChecker;;
+        "Uninstall Arx Libertatis completely")
+            libertatisUninstaller;;
+    esac
+else
+    exit 1
+fi
