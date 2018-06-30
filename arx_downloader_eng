@@ -100,7 +100,7 @@ function libertatisDownload () {
     toConfFile "TYPE=OnlyLibertatis" "INSTALL_DIR=$install_folder"
     
     ## Check latest version
-    getLatestLibertatisVersion
+    getLatestLibertatisVersion | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Libertatis Downloader" --text="Check for new versions..." --auto-close
     
     ## Choosing Libertatis version dialog, downloading, unpacking and installing
     ver=$(zenity --list --width=480 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="Please, select prefered Arx Libertatis version." --radiolist --column="" --column="Versions" TRUE "Latest Stable $latestStableVerShort (Recommended)" FALSE "Latest Development Snapshot ($latestVerShort)")
@@ -215,7 +215,7 @@ function libertatisVersionChecker () {
     fi
     
     ## Call getLatestLibertatisVersion function
-    getLatestLibertatisVersion
+    getLatestLibertatisVersion | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Libertatis Updater" --text="Check for new versions..." --auto-close
     
     ## arx-libertatis-1.2-dev-YYYY-MM-DD --> YYYY-MM-DD
     latest=$(echo $latestVer | grep -Eo '[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}')
