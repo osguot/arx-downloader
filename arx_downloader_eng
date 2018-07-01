@@ -11,7 +11,7 @@
 ##
 ###########################################################
 
-VERSION="3.1"
+VERSION="3.1.0"
 
 ## This file contain information about install directory and type of installation
 arx_downloader_conf_file="/home/$USER/.config/arx_downloader.conf"
