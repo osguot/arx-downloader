@@ -4,7 +4,7 @@
 #### Author: Osguot ####
 ########################
 
-VERSION="4.0-dev"
+VERSION="4.0.0-dev"
 
 ## This file contain information about install directory and type of installation
 arx_downloader_conf_file="/home/$USER/.config/arx_downloader.conf"
@@ -17,6 +17,25 @@ fi
 
 ## User share directory variable
 USER_SHARE=/home/$USER/.local/share
+
+function scriptUpdate () {
+
+    #gitScriptVer=$(wget -O- https://raw.githubusercontent.com/osguot/arx-downloader/master/arx_downloader_eng | grep 'VERSION=' | head -1 | cut -c 9- | tr -d '"')
+    gitScriptVer="4.0.0"
+    
+    if [[ "$gitScriptVer" > "$VERSION" ]]
+    then
+        zenity --question --no-wrap --ok-label="Update" --cancel-label="Exit" --title="Arx Downloder - Outdated version" --text="Script is out of date.\n\nCurrent script version: $VERSION\nNew version on GitHub: $gitScriptVer\n\nUpdate script?"
+        if [ $? -eq "0" ]
+        then
+            rm arx_downloader_eng
+            wget https://raw.githubusercontent.com/osguot/arx-downloader/master/arx_downloader_eng
+            chmod +x arx_downloader_eng
+            exit 0
+        else
+            exit 1
+        fi
+}
 
 function initialCheck () {
     
@@ -463,7 +482,6 @@ function end () {
 }
 
 function main () {
-    initialCheck
 
     ## Main menu constructor
     if [ -f "$arx_downloader_conf_file" ]
@@ -498,4 +516,5 @@ function main () {
     fi
 }
 
+initialCheck
 main
