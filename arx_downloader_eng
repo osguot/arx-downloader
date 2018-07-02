@@ -20,8 +20,7 @@ USER_SHARE=/home/$USER/.local/share
 
 function scriptUpdate () {
 
-    #gitScriptVer=$(wget -O- https://raw.githubusercontent.com/osguot/arx-downloader/master/arx_downloader_eng | grep 'VERSION=' | head -1 | cut -c 9- | tr -d '"')
-    gitScriptVer="4.0.0"
+    gitScriptVer=$(wget -O- https://raw.githubusercontent.com/osguot/arx-downloader/master/arx_downloader_eng | grep 'VERSION=' | head -1 | cut -c 9- | tr -d '"')
     
     if [[ "$gitScriptVer" > "$VERSION" ]]
     then
@@ -31,10 +30,12 @@ function scriptUpdate () {
             rm arx_downloader_eng
             wget https://raw.githubusercontent.com/osguot/arx-downloader/master/arx_downloader_eng
             chmod +x arx_downloader_eng
+            zenity --info --title="Arx Downloader" --text="Version $gitScriptVer downloaded. Please restart script."
             exit 0
         else
             exit 1
         fi
+    fi
 }
 
 function initialCheck () {
@@ -517,4 +518,5 @@ function main () {
 }
 
 initialCheck
+scriptUpdate
 main
