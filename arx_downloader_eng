@@ -4,14 +4,7 @@
 #### Author: Osguot ####
 ########################
 
-## TODO ###################################################
-##
-## * Updater not update stable version
-## * Make external language files
-##
-###########################################################
-
-VERSION="3.1.0"
+VERSION="4.0-dev"
 
 ## This file contain information about install directory and type of installation
 arx_downloader_conf_file="/home/$USER/.config/arx_downloader.conf"
@@ -469,36 +462,40 @@ function end () {
     exit 1
 }
 
-initialCheck
+function main () {
+    initialCheck
 
-## Main menu constructor
-if [ -f "$arx_downloader_conf_file" ]
-then
-    if [ "$TYPE" = "Complex" ] || [ "$TYPE" = "OnlyLibertatis" ]
+    ## Main menu constructor
+    if [ -f "$arx_downloader_conf_file" ]
     then
-        menu=$(zenity --list --width=310 --height=250 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="$MM_text" --radiolist --column="" --column="" TRUE "Check for updates" FALSE "Uninstall Arx Libertatis completely")
-    elif [ "$TYPE" = "OnlyFatalis" ]
-    then
-        menu=$(zenity --list --width=310 --height=250 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="$MM_text" --radiolist --column="" --column="" TRUE "Uninstall Arx Libertatis completely")
+        if [ "$TYPE" = "Complex" ] || [ "$TYPE" = "OnlyLibertatis" ]
+        then
+            menu=$(zenity --list --width=310 --height=250 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="$MM_text" --radiolist --column="" --column="" TRUE "Check for updates" FALSE "Uninstall Arx Libertatis completely")
+        elif [ "$TYPE" = "OnlyFatalis" ]
+        then
+            menu=$(zenity --list --width=310 --height=250 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="$MM_text" --radiolist --column="" --column="" TRUE "Uninstall Arx Libertatis completely")
+        fi
+    else
+        menu=$(zenity --list --width=310 --height=250 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="$MM_text" --radiolist --column="" --column="" TRUE "Download Arx Libertatis and Arx Fatalis" FALSE "Download Arx Libertatis only" FALSE "Download Arx Fatalis only" FALSE "Check for updates" FALSE "Uninstall Arx Libertatis completely")
     fi
-else
-    menu=$(zenity --list --width=310 --height=250 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="$MM_text" --radiolist --column="" --column="" TRUE "Download Arx Libertatis and Arx Fatalis" FALSE "Download Arx Libertatis only" FALSE "Download Arx Fatalis only" FALSE "Check for updates" FALSE "Uninstall Arx Libertatis completely")
-fi
 
-if [ $? -eq "0" ]
-then
-    case $menu in
-        "Download Arx Libertatis and Arx Fatalis")
-            libertatisDownload complex;;
-        "Download Arx Libertatis only")
-            libertatisDownload;;
-        "Download Arx Fatalis only")
-            gameDownload;;
-        "Check for updates")
-            libertatisVersionChecker;;
-        "Uninstall Arx Libertatis completely")
-            libertatisUninstaller;;
-    esac
-else
-    exit 1
-fi
+    if [ $? -eq "0" ]
+    then
+        case $menu in
+            "Download Arx Libertatis and Arx Fatalis")
+                libertatisDownload complex;;
+            "Download Arx Libertatis only")
+                libertatisDownload;;
+            "Download Arx Fatalis only")
+                gameDownload;;
+            "Check for updates")
+                libertatisVersionChecker;;
+            "Uninstall Arx Libertatis completely")
+                libertatisUninstaller;;
+        esac
+    else
+        exit 1
+    fi
+}
+
+main
