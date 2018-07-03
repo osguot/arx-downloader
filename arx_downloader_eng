@@ -19,6 +19,7 @@ fi
 USER_SHARE=/home/$USER/.local/share
 
 ## Lang work debug
+## TODO --- auto-download lang file
 #source ./en_US.lang
 source ./ru_RU.lang
 
