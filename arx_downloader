@@ -25,16 +25,16 @@ source ./ru_RU.lang
 
 function scriptUpdate () {
 
-    gitScriptVer=$(wget -O- https://raw.githubusercontent.com/osguot/arx-downloader/master/arx_downloader_eng | grep 'VERSION=' | head -1 | cut -c 9- | tr -d '"')
+    gitScriptVer=$(wget -O- https://raw.githubusercontent.com/osguot/arx-downloader/master/arx_downloader | grep 'VERSION=' | head -1 | cut -c 9- | tr -d '"')
     
     if [[ "$gitScriptVer" > "$VERSION" ]]
     then
         zenity --question --no-wrap --ok-label="$_updateLabel" --cancel-label="$_exitLabel" --title="$_funSU_title" --text="$_funSU_text"
         if [ $? -eq "0" ]
         then
-            rm arx_downloader_eng
-            wget https://raw.githubusercontent.com/osguot/arx-downloader/master/arx_downloader_eng
-            chmod +x arx_downloader_eng
+            rm arx_downloader
+            wget https://raw.githubusercontent.com/osguot/arx-downloader/master/arx_downloader
+            chmod +x arx_downloader
             zenity --info --no-wrap --title="$_funSU_titleSuccess" --text="$_funSU_textSuccess"
             exit 0
         else
