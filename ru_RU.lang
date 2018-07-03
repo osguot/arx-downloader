@@ -1,0 +1,30 @@
+## Russian translation file
+
+## Button labels
+_updateLabel="Обновить"
+_exitLabel="Выход"
+_nextLabel="Далее"
+
+## scriptUpdate function
+_funSU_title="Загрузчик Arx - Устаревшая версия"
+_funSU_text="Скрипт устарел.\n\nТекущая версия: $VERSION\nНовая версия на GitHub: $gitScriptVer\n\nОбновить скрипт?"
+_funSU_titleSuccess="Загрузчик Arx"
+_funSU_textSuccess="Загружена версия $gitScriptVer. Перезапустите скрипт."
+
+## Main function
+_funMain_title="Загрузчик Arx Libertatis"
+_funMain_checkForUpdatesOption="Проверить обновления"
+_funMain_uninstallOption="Полностью удалить Arx Libertatis"
+_funMain_downloadAllOption="Загрузить Arx Libertatis и Arx Fatalis"
+_funMain_downloadAlOnlyOption="Загрузить только Arx Libertatis"
+_funMain_downloadAfOnlyOption="Загрузить только Arx Fatalis"
+
+## initialCheck function
+_funIC_zenityNotFound="Zenity не обнаружен. Выход."
+_funIC_titleError="Arx Downloader - Ошибка"
+_funIC_textError="Этот скрипт НЕЛЬЗЯ запускать с правами администратора"
+
+_funIC_mainMenuConstructorAlOnly="Версия скрипта: $VERSION\n\nОбнаружен установленный Arx Libertatis!\nТип установки: Только Arx Libertatis\nВерсия: $AL_VERSION\nПуть: $INSTALL_DIR"
+_funIC_mainMenuConstructorAfOnly="Версия скрипта: $VERSION\n\nОбнаружен установленный Arx Fatalis!\nТип установки: Только Arx Fatalis\nПуть: $INSTALL_DIR"
+_funIC_mainMenuConstructorComplex="Версия скрипта: $VERSION\n\nОбнаружен установленный Arx Libertatis!\nТип установки: Arx Libertatis и Arx Fatalis\nВерсия: $AL_VERSION\nПуть: $INSTALL_DIR"
+_funIC_mainMenuConstructorDefault="Версия скрипта: $VERSION"

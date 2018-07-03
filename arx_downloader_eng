@@ -19,7 +19,8 @@ fi
 USER_SHARE=/home/$USER/.local/share
 
 ## Lang work debug
-source ./en_US.lang
+#source ./en_US.lang
+source ./ru_RU.lang
 
 function scriptUpdate () {
 
