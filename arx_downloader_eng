@@ -30,7 +30,7 @@ function scriptUpdate () {
             rm arx_downloader_eng
             wget https://raw.githubusercontent.com/osguot/arx-downloader/master/arx_downloader_eng
             chmod +x arx_downloader_eng
-            zenity --info --title="Arx Downloader" --text="Version $gitScriptVer downloaded. Please restart script."
+            zenity --info --no-wrap --title="Arx Downloader" --text="Version $gitScriptVer downloaded. Please restart script."
             exit 0
         else
             exit 1
