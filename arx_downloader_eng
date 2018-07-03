@@ -18,19 +18,22 @@ fi
 ## User share directory variable
 USER_SHARE=/home/$USER/.local/share
 
+## Lang work debug
+source ./en_US.lang
+
 function scriptUpdate () {
 
     gitScriptVer=$(wget -O- https://raw.githubusercontent.com/osguot/arx-downloader/master/arx_downloader_eng | grep 'VERSION=' | head -1 | cut -c 9- | tr -d '"')
     
     if [[ "$gitScriptVer" > "$VERSION" ]]
     then
-        zenity --question --no-wrap --ok-label="Update" --cancel-label="Exit" --title="Arx Downloder - Outdated version" --text="Script is out of date.\n\nCurrent script version: $VERSION\nNew version on GitHub: $gitScriptVer\n\nUpdate script?"
+        zenity --question --no-wrap --ok-label="$_updateLabel" --cancel-label="$_exitLabel" --title="$_funSU_title" --text="$_funSU_text"
         if [ $? -eq "0" ]
         then
             rm arx_downloader_eng
             wget https://raw.githubusercontent.com/osguot/arx-downloader/master/arx_downloader_eng
             chmod +x arx_downloader_eng
-            zenity --info --no-wrap --title="Arx Downloader" --text="Version $gitScriptVer downloaded. Please restart script."
+            zenity --info --no-wrap --title="$_funSU_titleSuccess" --text="$_funSU_textSuccess"
             exit 0
         else
             exit 1
@@ -43,14 +46,14 @@ function initialCheck () {
     ## Zenity check
     if [[ $(hash zenity) -eq "1" ]]
     then
-        echo "Zenity not found. Exit."
+        echo "$_funIC_zenityNotFound"
         exit 1
     fi
     
     ## Root check
     if [ "$EUID" -eq 0 ]
     then 
-        zenity --error --no-wrap --ok-label="Exit" --width=250 --title="Arx Downloader Checker - Error" --text="This script must NOT be run as root"
+        zenity --error --no-wrap --ok-label="$_exitLabel" --width=250 --title="$_funIC_titleError" --text="$_funIC_textError"
         exit 1
     fi
     
@@ -60,16 +63,16 @@ function initialCheck () {
         ## Set main menu text based on previous installation (if exist)
         if [ "$TYPE" = "OnlyLibertatis" ]
         then
-            declare -g MM_text="Script version: $VERSION\n\nFounded Arx Libertatis installation!\nType: Only Arx Libertatis\nVersion: $AL_VERSION\nPath: $INSTALL_DIR"
+            declare -g MM_text="$_funIC_mainMenuConstructorAlOnly"
         elif [ "$TYPE" = "OnlyFatalis" ]
         then
-            declare -g MM_text="Script version: $VERSION\n\nFounded Arx Fatalis installation!\nType: Only Arx Fatalis\nPath: $INSTALL_DIR"
+            declare -g MM_text="$_funIC_mainMenuConstructorAfOnly"
         elif [ "$TYPE" = "Complex" ]
         then
-            declare -g MM_text="Script version: $VERSION\n\nFounded Arx Libertatis installation!\nType: Arx Libertatis and Arx Fatalis\nVersion: $AL_VERSION\nPath: $INSTALL_DIR"
+            declare -g MM_text="$_funIC_mainMenuConstructorComplex"
         fi
     else
-        declare -g MM_text="Script version: $VERSION"
+        declare -g MM_text="$_funIC_mainMenuConstructorDefault"
     fi
 }
 
@@ -489,27 +492,27 @@ function main () {
     then
         if [ "$TYPE" = "Complex" ] || [ "$TYPE" = "OnlyLibertatis" ]
         then
-            menu=$(zenity --list --width=310 --height=250 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="$MM_text" --radiolist --column="" --column="" TRUE "Check for updates" FALSE "Uninstall Arx Libertatis completely")
+            menu=$(zenity --list --width=310 --height=250 --cancel-label="$_exitLabel" --ok-label="$_nextLabel" --title "$_funMain_title" --text="$MM_text" --radiolist --column="" --column="" TRUE "$_funMain_checkForUpdatesOption" FALSE "$_funMain_uninstallOption")
         elif [ "$TYPE" = "OnlyFatalis" ]
         then
-            menu=$(zenity --list --width=310 --height=250 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="$MM_text" --radiolist --column="" --column="" TRUE "Uninstall Arx Libertatis completely")
+            menu=$(zenity --list --width=310 --height=250 --cancel-label="$_exitLabel" --ok-label="$_nextLabel" --title "$_funMain_title" --text="$MM_text" --radiolist --column="" --column="" TRUE "$_funMain_uninstallOption")
         fi
     else
-        menu=$(zenity --list --width=310 --height=250 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="$MM_text" --radiolist --column="" --column="" TRUE "Download Arx Libertatis and Arx Fatalis" FALSE "Download Arx Libertatis only" FALSE "Download Arx Fatalis only" FALSE "Check for updates" FALSE "Uninstall Arx Libertatis completely")
+        menu=$(zenity --list --width=310 --height=250 --cancel-label="$_exitLabel" --ok-label="$_nextLabel" --title "$_funMain_title" --text="$MM_text" --radiolist --column="" --column="" TRUE "$_funMain_downloadAllOption" FALSE "$_funMain_downloadAlOnlyOption" FALSE "$_funMain_downloadAfOnlyOption" FALSE "$_funMain_checkForUpdatesOption" FALSE "$_funMain_uninstallOption")
     fi
 
     if [ $? -eq "0" ]
     then
         case $menu in
-            "Download Arx Libertatis and Arx Fatalis")
+            "$_funMain_downloadAllOption")
                 libertatisDownload complex;;
-            "Download Arx Libertatis only")
+            "$_funMain_downloadAlOnlyOption")
                 libertatisDownload;;
-            "Download Arx Fatalis only")
+            "$_funMain_downloadAfOnlyOption")
                 gameDownload;;
-            "Check for updates")
+            "$_funMain_checkForUpdatesOption")
                 libertatisVersionChecker;;
-            "Uninstall Arx Libertatis completely")
+            "$_funMain_uninstallOption")
                 libertatisUninstaller;;
         esac
     else

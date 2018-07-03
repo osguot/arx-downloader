@@ -1,0 +1,30 @@
+## English translation file
+
+## Button labels
+_updateLabel="Update"
+_exitLabel="Exit"
+_nextLabel="Next"
+
+## scriptUpdate function
+_funSU_title="Arx Downloder - Outdated version"
+_funSU_text="Script is out of date.\n\nCurrent script version: $VERSION\nNew version on GitHub: $gitScriptVer\n\nUpdate script?"
+_funSU_titleSuccess="Arx Downloader"
+_funSU_textSuccess="Version $gitScriptVer downloaded. Please restart script."
+
+## Main function
+_funMain_title="Arx Libertatis Downloader"
+_funMain_checkForUpdatesOption="Check for updates"
+_funMain_uninstallOption="Uninstall Arx Libertatis completely"
+_funMain_downloadAllOption="Download Arx Libertatis and Arx Fatalis"
+_funMain_downloadAlOnlyOption="Download Arx Libertatis only"
+_funMain_downloadAfOnlyOption="Download Arx Fatalis only"
+
+## initialCheck function
+_funIC_zenityNotFound="Zenity not found. Exit."
+_funIC_titleError="Arx Downloader Checker - Error"
+_funIC_textError="This script must NOT be run as root"
+
+_funIC_mainMenuConstructorAlOnly="Script version: $VERSION\n\nFounded Arx Libertatis installation!\nType: Only Arx Libertatis\nVersion: $AL_VERSION\nPath: $INSTALL_DIR"
+_funIC_mainMenuConstructorAfOnly="Script version: $VERSION\n\nFounded Arx Fatalis installation!\nType: Only Arx Fatalis\nPath: $INSTALL_DIR"
+_funIC_mainMenuConstructorComplex="Script version: $VERSION\n\nFounded Arx Libertatis installation!\nType: Arx Libertatis and Arx Fatalis\nVersion: $AL_VERSION\nPath: $INSTALL_DIR"
+_funIC_mainMenuConstructorDefault="Script version: $VERSION"
