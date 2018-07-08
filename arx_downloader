@@ -18,11 +18,6 @@ fi
 ## User share directory variable
 USER_SHARE=/home/$USER/.local/share
 
-## Lang work debug
-## TODO --- auto-download lang file
-#source ./en_US.lang
-source ./ru_RU.lang
-
 function scriptUpdate () {
 
     gitScriptVer=$(wget -O- https://raw.githubusercontent.com/osguot/arx-downloader/master/arx_downloader | grep 'VERSION=' | head -1 | cut -c 9- | tr -d '"')
@@ -44,6 +39,37 @@ function scriptUpdate () {
 }
 
 function initialCheck () {
+    
+    ## Language selection
+    local lang=$(zenity  --list --width=250 --cancel-label="Exit" --ok-label="Ok" --title "Arx Downloader" --text "Please select script language" --radiolist --hide-header --column "" --column "Script language" TRUE "English" FALSE "Russian")
+    
+    if [ $? -eq "0" ]
+    then
+        case $lang in
+            "English")
+                lang_file="./en_US.lang"
+                
+                if [ -f "$lang_file" ]
+                then
+                    source ./en_US.lang
+                else
+                    wget https://raw.githubusercontent.com/osguot/arx-downloader/lang_support/en_US.lang
+                    source ./en_US.lang
+                fi;;
+            "Russian")
+                lang_file="./ru_RU.lang"
+                
+                if [ -f "$lang_file" ]
+                then
+                    source ./ru_RU.lang
+                else
+                    wget https://raw.githubusercontent.com/osguot/arx-downloader/lang_support/ru_RU.lang
+                    source ./ru_RU.lang
+                fi;;
+        esac
+    else
+        exit 1
+    fi
     
     ## Zenity check
     if [[ $(hash zenity) -eq "1" ]]
