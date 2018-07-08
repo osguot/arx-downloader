@@ -4,11 +4,15 @@
 _updateLabel="Обновить"
 _exitLabel="Выход"
 _nextLabel="Далее"
+_cancelLabel="Отмена"
+_okLabel="Ок"
+_yesLabel="Да"
+_noLabel="Нет"
+_doneLabel="Завершить"
 
 ## scriptUpdate function
-_funSU_title="Загрузчик Arx - Устаревшая версия"
+_funSU_title="Загрузчик Arx"
 _funSU_text="Скрипт устарел.\n\nТекущая версия: $VERSION\nНовая версия на GitHub: $gitScriptVer\n\nОбновить скрипт?"
-_funSU_titleSuccess="Загрузчик Arx"
 _funSU_textSuccess="Загружена версия $gitScriptVer. Перезапустите скрипт."
 
 ## Main function

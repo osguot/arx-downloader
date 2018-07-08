@@ -20,8 +20,8 @@ USER_SHARE=/home/$USER/.local/share
 
 ## Lang work debug
 ## TODO --- auto-download lang file
-#source ./en_US.lang
-source ./ru_RU.lang
+source ./en_US.lang
+#source ./ru_RU.lang
 
 function scriptUpdate () {
 
@@ -35,7 +35,7 @@ function scriptUpdate () {
             rm arx_downloader
             wget https://raw.githubusercontent.com/osguot/arx-downloader/master/arx_downloader
             chmod +x arx_downloader
-            zenity --info --no-wrap --title="$_funSU_titleSuccess" --text="$_funSU_textSuccess"
+            zenity --info --no-wrap --title="$_funSU_title" --text="$_funSU_textSuccess"
             exit 0
         else
             exit 1
@@ -81,10 +81,10 @@ function initialCheck () {
 function libertatisDownload () {
     
     ## Set Arx Libertatis install directory
-    directory=$(zenity  --list --width=400 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text "Choose directory for Arx Libertatis files.\nArx directory will be created automatically in the selected directory.\n\nDefault: $USER_SHARE" --radiolist --hide-header --column "" --column "Options" TRUE "Default" FALSE "Choose...")
+    directory=$(zenity  --list --width=400 --cancel-label="$_exitLabel" --ok-label="$_nextLabel" --title "$_funMain_title" --text "$_funLD_text" --radiolist --hide-header --column "" --column "$_funLD_column" TRUE "$_funLD_defaultOption" FALSE "$_funLD_chooseOption")
     if [ $? -eq "0" ]
     then
-        if [ "$directory" = "Default" ]
+        if [ "$directory" = "$_funLD_defaultOption" ]
         then
             declare -g install_folder="$USER_SHARE"
             cd $install_folder
@@ -94,9 +94,9 @@ function libertatisDownload () {
             fi
             mkdir -p "$install_folder/arx"
         else
-            if [ "$directory" = "Choose..." ]
+            if [ "$directory" = "$_funLD_chooseOption" ]
             then
-                declare -g install_folder=`zenity --file-selection --directory --title="Choose directory for Arx Libertatis files"`
+                declare -g install_folder=`zenity --file-selection --directory --title="$_funLD_fsTitle"`
                 if [ $? -eq "0" ]
                 then
                     cd $install_folder
@@ -118,16 +118,16 @@ function libertatisDownload () {
     toConfFile "TYPE=OnlyLibertatis" "INSTALL_DIR=$install_folder"
     
     ## Check latest version
-    getLatestLibertatisVersion | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Libertatis Downloader" --text="Check for new versions..." --auto-close
+    getLatestLibertatisVersion | zenity --progress --width=300 --pulsate --cancel-label="$_cancelLabel" --title="$_funMain_title" --text="$_funLD_text2" --auto-close
     
     ## Choosing Libertatis version dialog, downloading, unpacking and installing
-    ver=$(zenity --list --width=480 --cancel-label="Exit" --ok-label="Next" --title "Arx Libertatis Downloader" --text="Please, select prefered Arx Libertatis version." --radiolist --column="" --column="Versions" TRUE "Latest Stable $latestStableVerShort (Recommended)" FALSE "Latest Development Snapshot ($latestVerShort)")
+    ver=$(zenity --list --width=480 --cancel-label="$_exitLabel" --ok-label="$_nextLabel" --title "$_funMain_title" --text="$_funLD_text3" --radiolist --column="" --column="$_funLD_column2" TRUE "$_funLD_latestStableOption" FALSE "$_funLD_latestDevOption")
     if [ $? -eq "0" ]
     then
-        if [ "$ver" = "Latest Stable $latestStableVerShort (Recommended)" ]
+        if [ "$ver" = "$_funLD_latestStableOption" ]
         then
             cd $install_folder/arx
-            curl -sqL $latestStableLinuxVerURL | tar xJf - | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Libertatis Downloader" --text="Downloading and unpacking Arx Libertatis" --auto-close
+            curl -sqL $latestStableLinuxVerURL | tar xJf - | zenity --progress --width=300 --pulsate --cancel-label="$_cancelLabel" --title="$_funMain_title" --text="$_funLD_text4" --auto-close
             
             ## Move all downloaded files into arx diectory
             cd $latestStableVer-linux
@@ -139,7 +139,7 @@ function libertatisDownload () {
         else
             ## Go to install directory and download archive into it
             cd $install_folder/arx
-            curl -sqL $latestLinuxVerURL | tar xJf - | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Libertatis Downloader" --text="Downloading and unpacking Arx Libertatis" --auto-close
+            curl -sqL $latestLinuxVerURL | tar xJf - | zenity --progress --width=300 --pulsate --cancel-label="$_cancelLabel" --title="$_funMain_title" --text="$_funLD_text4" --auto-close
             
             ## Move all downloaded files into arx diectory
             cd $latestVer-linux
@@ -158,11 +158,11 @@ function libertatisDownload () {
     then
         gameDownload complex
     else
-        zenity --info --no-wrap --title="Arx Libertatis Downloader" --ok-label="Ok" --text="Arx Libertatis successfully downloaded."
+        zenity --info --no-wrap --title="$_funMain_title" --ok-label="$_okLabel" --text="$_funLD_text5"
     fi
     
     ## Call install function
-    zenity --question --no-wrap --ok-label="Yes" --cancel-label="No" --title="Arx Libertatis Installer" --text="Do you want add shortcut to the application menu and install arx binaries?\n\nRoot privileges is required."
+    zenity --question --no-wrap --ok-label="$_yesLabel" --cancel-label="$_noLabel" --title="$_funMain_title" --text="$_funLD_text6"
     if [ $? -eq "0" ]
     then
         libertatisInstall
@@ -194,7 +194,7 @@ function libertatisVersionChecker () {
 
         ## Go to install directory and download archive into it
         cd $INSTALL_DIR/arx
-        curl -sqL $latestLinuxVerURL | tar xJf - | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Libertatis Updater" --text="Downloading and unpacking Arx Libertatis" --auto-close
+        curl -sqL $latestLinuxVerURL | tar xJf - | zenity --progress --width=300 --pulsate --cancel-label="$_cancelLabel" --title="$_funLU_title" --text="$_funLU_text" --auto-close
         
         cd $latestVer-linux
         ## Remove old bin and data directories and copy new one
@@ -206,7 +206,7 @@ function libertatisVersionChecker () {
         oldVersion=$(grep "AL_VERSION=" $arx_downloader_conf_file)
         sed -i -e "s/$oldVersion/AL_VERSION=$latestVer/g" $arx_downloader_conf_file
         
-        zenity --info --no-wrap --title="Arx Libertatis Updater" --text="Arx Libertatis successfully updated to version $latestVer."
+        zenity --info --no-wrap --title="$_funLU_title" --text="$_funLU_text2"
     }
     
     ## Check conf file
@@ -215,11 +215,11 @@ function libertatisVersionChecker () {
         ## Check current installed version
         if [ -z "$AL_VERSION" ]
         then
-            zenity --warning --no-wrap --title="Arx Libertatis Updater" --ok-label="Exit" --text="Arx Libertatis installation not found.\n\nArx Libertatis MUST be installed by this script."
+            zenity --warning --no-wrap --title="$_funLU_title" --ok-label="$_exitLabel" --text="$_funLU_text3"
             exit 1
         elif [ "$AL_VERSION" = "Stable" ]
         then
-            upgr=$(zenity --question --no-wrap --title="Arx Libertatis Updater" --ok-label="Yes" --cancel-label="No" --text="Your current installed version of Arx Libertatis is Stable.\n\nDo you want to upgrade to the development version?")
+            upgr=$(zenity --question --no-wrap --title="$_funLU_title" --ok-label="$_yesLabel" --cancel-label="$_noLabel" --text="$_funLU_text4")
             
             ## Exit if No
             if [ $? -eq "1" ]
@@ -228,12 +228,12 @@ function libertatisVersionChecker () {
             fi
         fi
     else
-        zenity --warning --no-wrap --title="Arx Libertatis Updater" --ok-label="Exit" --text="Arx Libertatis installation not found.\n\nArx Libertatis MUST be installed by this script."
+        zenity --warning --no-wrap --title="$_funLU_title" --ok-label="$_exitLabel" --text="$_funLU_text3"
         exit 1
     fi
     
     ## Call getLatestLibertatisVersion function
-    getLatestLibertatisVersion | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Libertatis Updater" --text="Check for new versions..." --auto-close
+    getLatestLibertatisVersion | zenity --progress --width=300 --pulsate --cancel-label="$_cancelLabel" --title="$_funLU_title" --text="$_funLU_text5" --auto-close
     
     ## arx-libertatis-1.2-dev-YYYY-MM-DD --> YYYY-MM-DD
     latest=$(echo $latestVer | grep -Eo '[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}')
@@ -242,7 +242,7 @@ function libertatisVersionChecker () {
     ## Version comparison
     if [[ "$latest" > "$current" ]]
     then
-        upd=$(zenity --question --no-wrap --title="Arx Libertatis Updater" --ok-label="Yes" --cancel-label="No" --text="Update available! \n\nCurrent version: $AL_VERSION\nNew version: $latestVer\n\nStart update process?")
+        upd=$(zenity --question --no-wrap --title="$_funLU_title" --ok-label="$_yesLabel" --cancel-label="$_noLabel" --text="$_funLU_text6")
         if [ $? -eq "0" ]
         then
             libertatisUpdate
@@ -250,7 +250,7 @@ function libertatisVersionChecker () {
             exit 0
         fi
     else
-        zenity --warning --no-wrap --title="Arx Libertatis Updater" --ok-label="Exit" --text="New versions of Arx Libertatis not found."
+        zenity --warning --no-wrap --title="$_funLU_title" --ok-label="$_exitLabel" --text="$_funLU_text7"
         exit 0
     fi
 }
@@ -281,7 +281,7 @@ EOF
     toConfFile "BIN_ICO=true"
     
     ## Info message
-    zenity --info --no-wrap --window-icon=arx-libertatis_32.png --title="Arx Libertatis Installer" --text="Arx Libertatis successfully installed!"
+    zenity --info --no-wrap --window-icon=arx-libertatis_32.png --title="$_funLI_title" --text="$_funLI_text"
 }
 
 function libertatisUninstaller () {
@@ -289,13 +289,13 @@ function libertatisUninstaller () {
     ## Check and export conf file
     if [ -f "$arx_downloader_conf_file" ]
     then
-        zenity --question --no-wrap --ok-label="Yes" --cancel-label="Cancel" --title="Arx Uninstaller - WARNING" --text="Are you sure you want to completly delete Arx Libertatis?\nThis also delete game data files.\n\nIf saves will be detected script will offer to save them."
+        zenity --question --no-wrap --ok-label="$_yesLabel" --cancel-label="$_cancelLabel" --title="$_funLUN_title" --text="$_funLUN_text"
         if [ $? -eq "1" ]
         then
             exit 1
         fi
     else
-        zenity --error --no-wrap --title="Arx Uninstaller" --text="It looks like Arx is not installed on your system or it be installed without this script. Aborting."
+        zenity --error --no-wrap --title="$_funLUN_title" --text="$_funLUN_text2"
         end
     fi
     
@@ -324,11 +324,11 @@ function libertatisUninstaller () {
             rm -rf $USER_SHARE/arx
         else
             ## Game saves found
-            saves=$(zenity --question --no-wrap --ok-label="Backup Saves" --cancel-label="Delete Saves" --title="Arx Uninstaller" --text="Game saves has been found.\n\nWhat do you want to do?")
+            saves=$(zenity --question --no-wrap --ok-label="$_funLUN_backupLabel" --cancel-label="$_funLUN_deleteLabel" --title="$_funLUN_title" --text="$_funLUN_text3")
             if [ $? -eq "0" ]
             then
                 ## Backup saves
-                backup_dir=$(zenity --file-selection --directory --title="Choose folder for backup")
+                backup_dir=$(zenity --file-selection --directory --title="$_funLUN_fsTitle")
                 backup_name="Arx_Saves_Backup_($(date +"%d-%b-%Y")).tar.gz"
                 cd $USER_SHARE
                 tar -zcf $backup_dir/$backup_name arx/save
@@ -353,7 +353,7 @@ function libertatisUninstaller () {
     rm $arx_downloader_conf_file
     
     ## Success message
-    zenity --info --no-wrap --ok-label="Done" --title="Arx Uninstaller" --text="Arx Libertatis successfully uninstalled!"
+    zenity --info --no-wrap --ok-label="$_doneLabel" --title="$_funLUN_title" --text="$_funLUN_text4"
 }
 
 function gameDownload () {
@@ -368,18 +368,18 @@ function gameDownload () {
         toConfFile "AL_VERSION=$latestVer"
     else
         ## Set directory for downloaded game files
-        directory=$(zenity  --list --width=400 --cancel-label="Exit" --ok-label="Next" --title "Arx Downloader" --text "Choose directory for downloaded game files.\nDefault: /home/$USER/arx_downloader" --radiolist --hide-header --column "" --column "Options" TRUE "Default" FALSE "Choose...")
+        directory=$(zenity  --list --width=400 --cancel-label="$_exitLabel" --ok-label="$_nextLabel" --title "$_funGD_title" --text "$_funGD_text" --radiolist --hide-header --column "" --column "$_funGD_column" TRUE "$_funGD_defaultOption" FALSE "$_funGD_chooseOption")
         if [ $? -eq "0" ]
         then
-            if [ "$directory" = "Default" ]
+            if [ "$directory" = "$_funGD_defaultOption" ]
             then
                 working_folder="/home/$USER/arx_downloader"
                 mkdir -p "$working_folder"
 
             else
-                if [ "$directory" = "Choose..." ]
+                if [ "$directory" = "$_funGD_chooseOption" ]
                 then
-                    working_folder=`zenity --file-selection --directory --title="Choose directory for downloaded game files"`/arx_downloader
+                    working_folder=`zenity --file-selection --directory --title="$_funGD_fsTitle"`/arx_downloader
                     if [ $? -eq "0" ]
                     then
                         mkdir -p "$working_folder"
@@ -397,7 +397,7 @@ function gameDownload () {
     fi
 
     ## Set Steam login and password
-    loginpass=$(zenity --username --password --title="Enter your Steam Username and Password")
+    loginpass=$(zenity --username --password --title="$_funGD_text2")
     if [ $? -eq "1" ]
     then
         end
@@ -406,29 +406,29 @@ function gameDownload () {
 
     ## Download SteamCMD
     cd $working_folder
-    curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf - | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Downloader" --text="Downloading and unpacking SteamCMD" --auto-close
-    ./steamcmd.sh +login anonymous +quit | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Downloader" --text="Updating SteamCMD" --auto-close
+    curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf - | zenity --progress --width=300 --pulsate --cancel-label="$_cancelLabel" --title="$_funGD_title" --text="$_funGD_text3" --auto-close
+    ./steamcmd.sh +login anonymous +quit | zenity --progress --width=300 --pulsate --cancel-label="$_cancelLabel" --title="$_funGD_title" --text="$_funGD_text4" --auto-close
 
     ## Game language selection
-    lang=$(zenity  --list --width=400 --height=300 --cancel-label="Cancel" --ok-label="Next" --title "Arx Downloader" --text="Choose prefered game language" --radiolist --column="" --column="Language" TRUE "English" FALSE "Russian" FALSE "French" FALSE "Italian" FALSE "German" FALSE "Spanish")
+    lang=$(zenity  --list --width=400 --height=300 --cancel-label="$_cancelLabel" --ok-label="$_nextLabel" --title "$_funGD_title" --text="$_funGD_text5" --radiolist --column="" --column="$_funGD_columnLang" TRUE "$_funGD_en" FALSE "$_funGD_ru" FALSE "$_funGD_fr" FALSE "$_funGD_it" FALSE "$_funGD_de" FALSE "$_funGD_es")
     if [ $? -eq "0" ]
     then
         case $lang in
-            Russian)
+            "$_funGD_ru")
                 language="russian";;
-            French)
+            "$_funGD_fr")
                 language="french";;
-            Italian)
+            "$_funGD_it")
                 language="italian";;
-            German)
+            "$_funGD_de")
                 language="german";;
-            Spanish)
+            "$_funGD_es")
                 language="spanish";;
             *)
                 language="english";;
         esac
     else
-        zenity --question --no-wrap --title="Arx Downloader" --text="Stop the script and abort Arx downloading?"
+        zenity --question --no-wrap --title="$_funGD_title" --text="$_funGD_text6"
         if [ $? -eq "0" ]
         then
             end
@@ -450,11 +450,11 @@ function gameDownload () {
         for i in *; do mv $i `echo $i | tr [:upper:] [:lower:]`; done
         if [ $? -eq "0" ]
         then
-            zenity --info --no-wrap --title="Arx Downloader" --ok-label="Ok" --text="Arx Fatalis successfully downloaded."
+            zenity --info --no-wrap --title="$_funGD_title" --ok-label="$_okLabel" --text="$_funGD_text7"
         fi
     else
         #echo "Fail"
-        zenity --error --no-wrap --title="Arx Downloader - Ooops" --text="Arx Downloader\n\nAn error occurred. Please try again."
+        zenity --error --no-wrap --title="$_funGD_errTitle" --text="$_funGD_errText"
         rm -r arx linux64 linux32 package public steamcmd.sh
     fi
     
@@ -462,7 +462,7 @@ function gameDownload () {
     if [ "$1" = "complex" ]
     then
         cd $working_folder
-        cp -r * .. | zenity --progress --width=300 --pulsate --cancel-label="Cancel" --title="Arx Downloader" --text="Copying files..." --auto-close
+        cp -r * .. | zenity --progress --width=300 --pulsate --cancel-label="$_cancelLabel" --title="$_funGD_title" --text="$_funGD_text8" --auto-close
         rm -rf ../arx_downloader
     fi
 }

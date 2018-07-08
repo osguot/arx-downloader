@@ -4,11 +4,15 @@
 _updateLabel="Update"
 _exitLabel="Exit"
 _nextLabel="Next"
+_cancelLabel="Cancel"
+_okLabel="Ok"
+_yesLabel="Yes"
+_noLabel="No"
+_doneLabel="Done"
 
 ## scriptUpdate function
-_funSU_title="Arx Downloder - Outdated version"
+_funSU_title="Arx Downloder"
 _funSU_text="Script is out of date.\n\nCurrent script version: $VERSION\nNew version on GitHub: $gitScriptVer\n\nUpdate script?"
-_funSU_titleSuccess="Arx Downloader"
 _funSU_textSuccess="Version $gitScriptVer downloaded. Please restart script."
 
 ## Main function
@@ -28,3 +32,68 @@ _funIC_mainMenuConstructorAlOnly="Script version: $VERSION\n\nFounded Arx Libert
 _funIC_mainMenuConstructorAfOnly="Script version: $VERSION\n\nFounded Arx Fatalis installation!\nType: Only Arx Fatalis\nPath: $INSTALL_DIR"
 _funIC_mainMenuConstructorComplex="Script version: $VERSION\n\nFounded Arx Libertatis installation!\nType: Arx Libertatis and Arx Fatalis\nVersion: $AL_VERSION\nPath: $INSTALL_DIR"
 _funIC_mainMenuConstructorDefault="Script version: $VERSION"
+
+# libertatisDownload function
+# _funLD_title = _funMain_title
+_funLD_text="Choose directory for Arx Libertatis files.\nArx directory will be created automatically in the selected directory.\n\nDefault: $USER_SHARE"
+_funLD_column="Options"
+_funLD_defaultOption="Default"
+_funLD_chooseOption="Choose..."
+_funLD_fsTitle="Choose directory for Arx Libertatis files"
+_funLD_text2="Check for new versions..."
+_funLD_text3="Please, select prefered Arx Libertatis version."
+_funLD_column2="Versions"
+_funLD_latestStableOption="Latest Stable $latestStableVerShort (Recommended)"
+_funLD_latestDevOption="Latest Development Snapshot ($latestVerShort)"
+_funLD_text4="Downloading and unpacking Arx Libertatis"
+_funLD_text5="Arx Libertatis successfully downloaded."
+_funLD_text6="Do you want add shortcut to the application menu and install arx binaries?\n\nRoot privileges is required."
+
+## libertatisUpdate function
+_funLU_title="Arx Libertatis Updater"
+_funLU_text="Downloading and unpacking Arx Libertatis"
+_funLU_text2="Arx Libertatis successfully updated to version $latestVer."
+_funLU_text3="Arx Libertatis installation not found.\n\nArx Libertatis MUST be installed by this script."
+_funLU_text4="Your current installed version of Arx Libertatis is Stable.\n\nDo you want to upgrade to the development version?"
+_funLU_text5="Check for new versions..."
+_funLU_text6="Update available! \n\nCurrent version: $AL_VERSION\nNew version: $latestVer\n\nStart update process?"
+_funLU_text7="New versions of Arx Libertatis not found."
+
+## libertatisInstall function
+_funLI_title="Arx Libertatis Installer"
+_funLI_text="Arx Libertatis successfully installed!"
+
+## libertatisUninstaller function
+_funLUN_title="Arx Uninstaller"
+_funLUN_text="Are you sure you want to completly delete Arx Libertatis?\nThis also delete game data files.\n\nIf saves will be detected script will offer to save them."
+_funLUN_text2="It looks like Arx is not installed on your system or it be installed without this script. Aborting."
+_funLUN_backupLabel="Backup Saves"
+_funLUN_deleteLabel="Delete Saves"
+_funLUN_text3="Game saves has been found.\n\nWhat do you want to do?"
+_funLUN_fsTitle="Choose folder for backup"
+_funLUN_text4="Arx Libertatis successfully uninstalled!"
+
+## gameDownload function
+_funGD_title="Arx Fatalis Downloader"
+_funGD_text="Choose directory for downloaded game files.\nDefault: /home/$USER/arx_downloader"
+_funGD_column="Options"
+_funGD_defaultOption="Default"
+_funGD_chooseOption="Choose..."
+_funGD_fsTitle="Choose directory for downloaded game files"
+_funGD_text2="Enter your Steam Username and Password"
+_funGD_text3="Downloading and unpacking SteamCMD"
+_funGD_text4="Updating SteamCMD"
+_funGD_text5="Choose prefered game language"
+_funGD_columnLang="Language"
+_funGD_en="English"
+_funGD_ru="Russian"
+_funGD_fr="French"
+_funGD_it="Italian"
+_funGD_de="German"
+_funGD_es="Spanish"
+_funGD_text6="Stop the script and abort Arx downloading?"
+_funGD_text7="Arx Fatalis successfully downloaded."
+_funGD_errTitle="Arx Downloader - Ooops"
+_funGD_errText="Arx Downloader\n\nAn error occurred. Please try again."
+_funGD_text8="Copying files..."
+
