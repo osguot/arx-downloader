@@ -4,7 +4,7 @@
 #### Author: Osguot ####
 ########################
 
-VERSION="4.0.0"
+VERSION="4.0.1"
 
 ## This file contain information about install directory and type of installation
 arx_downloader_conf_file="/home/$USER/.config/arx_downloader.conf"
@@ -144,7 +144,7 @@ function libertatisDownload () {
     toConfFile "TYPE=OnlyLibertatis" "INSTALL_DIR=$install_folder"
     
     ## Check latest version
-    getLatestLibertatisVersion | zenity --progress --width=300 --pulsate --cancel-label="$_cancelLabel" --title="$_funMain_title" --text="$_funLD_text2" --auto-close
+    #getLatestLibertatisVersion | zenity --progress --width=300 --pulsate --cancel-label="$_cancelLabel" --title="$_funMain_title" --text="$_funLD_text2" --auto-close
     
     ## Choosing Libertatis version dialog, downloading, unpacking and installing
     ver=$(zenity --list --width=480 --cancel-label="$_exitLabel" --ok-label="$_nextLabel" --title "$_funMain_title" --text="$_funLD_text3" --radiolist --column="" --column="$_funLD_column2" TRUE "$_funLD_latestStableOption" FALSE "$_funLD_latestDevOption")
@@ -198,20 +198,20 @@ function libertatisDownload () {
 function getLatestLibertatisVersion () {
 
     ## Detecting latest stable version of Arx Libertatis from arx-libertatis.org
-    declare -g latestStableVer=$(wget -O- http://arx-libertatis.org/files/ | grep -Eo 'arx-libertatis-[[:digit:]]{1}.[[:digit:]]{1}.[[:digit:]]{1}' | sort -V | tail -1)
+    latestStableVer=$(wget -O- http://arx-libertatis.org/files/ | grep -Eo 'arx-libertatis-[[:digit:]]{1}.[[:digit:]]{1}.[[:digit:]]{1}' | sort -V | tail -1)
     ## Detecting latest dev version of Arx Libertatis from arx-libertatis.org
-    declare -g latestVer=$(wget -O- http://arx-libertatis.org/files/snapshots/ | grep -Eo 'arx-libertatis-1.2-dev-[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}' | sort -V | tail -1)
+    latestVer=$(wget -O- http://arx-libertatis.org/files/snapshots/ | grep -Eo 'arx-libertatis-1.2-dev-[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}' | sort -V | tail -1)
     
     ## Set file name and url for the latest stable Arx Libertatis version
-    declare -g latestStableLinuxVerFile=$latestStableVer"-linux.tar.xz"
-    declare -g latestStableLinuxVerURL="http://arx-libertatis.org/files/$latestStableVer/$latestStableLinuxVerFile"
+    latestStableLinuxVerFile=$latestStableVer"-linux.tar.xz"
+    latestStableLinuxVerURL="http://arx-libertatis.org/files/$latestStableVer/$latestStableLinuxVerFile"
     ## Set file name and url for the latest Arx Libertatis version
-    declare -g latestLinuxVerFile=$latestVer"-linux.tar.xz"
-    declare -g latestLinuxVerURL="http://arx-libertatis.org/files/snapshots/$latestVer/$latestLinuxVerFile"
+    latestLinuxVerFile=$latestVer"-linux.tar.xz"
+    latestLinuxVerURL="http://arx-libertatis.org/files/snapshots/$latestVer/$latestLinuxVerFile"
     
     ## "short-version" variables
-    declare -g latestStableVerShort=$(echo $latestStableVer | cut -c 16-)
-    declare -g latestVerShort=$(echo $latestVer | cut -c 16-)
+    latestStableVerShort=$(echo $latestStableVer | cut -c 16-)
+    latestVerShort=$(echo $latestVer | cut -c 16-)
 }
 
 function libertatisVersionChecker () {
@@ -259,7 +259,7 @@ function libertatisVersionChecker () {
     fi
     
     ## Call getLatestLibertatisVersion function
-    getLatestLibertatisVersion | zenity --progress --width=300 --pulsate --cancel-label="$_cancelLabel" --title="$_funLU_title" --text="$_funLU_text5" --auto-close
+    #getLatestLibertatisVersion | zenity --progress --width=300 --pulsate --cancel-label="$_cancelLabel" --title="$_funLU_title" --text="$_funLU_text5" --auto-close
     
     ## arx-libertatis-1.2-dev-YYYY-MM-DD --> YYYY-MM-DD
     latest=$(echo $latestVer | grep -Eo '[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}')
@@ -548,6 +548,7 @@ function main () {
     fi
 }
 
+getLatestLibertatisVersion
 initialCheck
 scriptUpdate
 main
